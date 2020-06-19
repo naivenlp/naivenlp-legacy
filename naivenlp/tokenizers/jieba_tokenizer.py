@@ -58,7 +58,7 @@ def count_default_freq(file, sep=" ", default_freq=1, **kwargs):
         words_freq[word] = freq
         words_freq_total += freq
         for idx in range(len(word)):
-            c = word[:idx+1]
+            c = word[:idx + 1]
             if c not in words_freq:
                 words_freq[c] = 0
     fd.close()
@@ -184,7 +184,7 @@ class HMMTokenizer(object):
             for y in states:
                 emit_p = emit_probs[y].get(obsrvs[x], _MIN_FLOAT)
                 (prob, state) = max(
-                    [(V[x-1][y0] + trans_probs[y0].get(y, _MIN_FLOAT) + emit_p, y0) for y0 in PREV_STATUS[y]]
+                    [(V[x - 1][y0] + trans_probs[y0].get(y, _MIN_FLOAT) + emit_p, y0) for y0 in PREV_STATUS[y]]
                 )
                 V[x][y] = prob
                 new_path[y] = path[state] + [y]
@@ -204,7 +204,7 @@ class HMMTokenizer(object):
             if pos == "B":
                 b = i
             elif pos == "E":
-                yield sequence[b:i+1]
+                yield sequence[b:i + 1]
             elif pos == "S":
                 yield char
                 n = i + 1
@@ -274,7 +274,7 @@ class JiebaTokenizer(VocabBasedTokenizer):
         if self.user_dict_files:
             s1 = now()
             count_freq(self.user_dict_files, self.words_freq, self.words_freq_total)
-            logging.info('Load user word freq files finished. Cost %d ms.', now()-s1)
+            logging.info('Load user word freq files finished. Cost %d ms.', now() - s1)
 
         self.hmm.initialize()
 
@@ -349,7 +349,7 @@ class JiebaTokenizer(VocabBasedTokenizer):
         while x < N:
             y = route[x][1] + 1
             word = sequence[x:y]
-            if y-x == 1:
+            if y - x == 1:
                 buffer += word
                 x = y
                 continue
