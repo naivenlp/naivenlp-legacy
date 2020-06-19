@@ -2,6 +2,7 @@ import logging
 
 from .tokenizers.abstract_tokenizer import (AbstractTokenizer,
                                             VocabBasedTokenizer)
+from .tokenizers.language_model_tokenizer import LanguageModelTokenizer
 from .tokenizers.jieba_tokenizer import JiebaTokenizer
 
 __version__ = "0.0.1"
