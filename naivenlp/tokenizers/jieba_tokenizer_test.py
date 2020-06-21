@@ -1,29 +1,46 @@
 import unittest
 
-from .jieba_tokenizer import JiebaTokenizer
+import jieba
+
+from .jieba_tokenizer import ACCURATE_MODE, FULL_MODE, SEARCH_MODE, JiebaTokenizer
 
 
 class JiebaTokenizerTest(unittest.TestCase):
 
-    def testJiebaTokenizer(self):
+    def testTokenize(self):
         tokenizer = JiebaTokenizer(
             vocab_file=None,
-            dict_files=[
-                #    'naivenlp/tokenizers/data/dict.txt',
-                'data/jieba/hello.txt'
+            userdict_files=[
+                'data/jieba/hello.txt',
+                'naivenlp/tokenizers/data/dict.txt',
             ])
-        tokenizer.initialize()
-        words = [w for w in tokenizer.tokenize('我在上海工作', cut_all=True, hmm=False)]
-        print(words)
 
-        words = [w for w in tokenizer.tokenize('我在上海工作', cut_all=False, hmm=False)]
-        print(words)
+        sentences = [
+            '我在上海工作',
+            '我来到北京清华大学',
+            '乒乓球拍卖完了',
+            '中国科学技术大学',
+        ]
 
-        words = [w for w in tokenizer.tokenize('我在上海工作', cut_all=False, hmm=True)]
-        print(words)
-
-        print(list(tokenizer.words_freq.items())[:10])
-        print(tokenizer.special_tokens)
+        for sent in sentences:
+            self.assertEqual(
+                [t for t in jieba.cut(sent, cut_all=False, HMM=True)],
+                tokenizer.tokenize(sent, mode=ACCURATE_MODE, hmm=True))
+            self.assertEqual(
+                [t for t in jieba.cut(sent, cut_all=False, HMM=False)],
+                tokenizer.tokenize(sent, mode=ACCURATE_MODE, hmm=False))
+            self.assertEqual(
+                [t for t in jieba.cut(sent, cut_all=True, HMM=True)],
+                tokenizer.tokenize(sent, mode=FULL_MODE, hmm=True))
+            self.assertEqual(
+                [t for t in jieba.cut(sent, cut_all=True, HMM=False)],
+                tokenizer.tokenize(sent, mode=FULL_MODE, hmm=True))
+            self.assertEqual(
+                [t for t in jieba.cut_for_search(sent, HMM=True)],
+                tokenizer.tokenize(sent, mode=SEARCH_MODE, hmm=True))
+            self.assertEqual(
+                [t for t in jieba.cut_for_search(sent, HMM=False)],
+                tokenizer.tokenize(sent, mode=SEARCH_MODE, hmm=False))
 
 
 if __name__ == "__main__":
