@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="naivenlp",
-    version="0.0.1",
+    version="0.0.2",
     description="NLP toolkit, including tokenization, sequence tagging, etc.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -25,7 +25,7 @@ setuptools.setup(
         ]
     },
     install_requires=[
-
+        "jieba",
     ],
     extras_require={
 
