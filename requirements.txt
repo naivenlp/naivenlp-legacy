@@ -1,3 +1,4 @@
 jieba
 numpy
 git+https://github.com/kpu/kenlm.git
+lac

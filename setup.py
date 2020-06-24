@@ -22,6 +22,7 @@ setuptools.setup(
     install_requires=[
         "jieba",
         "numpy",
+        "lac",
         "git+https://github.com/kpu/kenlm.git"
     ],
     extras_require={
