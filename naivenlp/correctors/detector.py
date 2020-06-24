@@ -4,7 +4,7 @@ import re
 import kenlm
 import numpy as np
 
-from naivenlp import AbstractTokenizer
+from naivenlp.tokenizers.abstract_tokenizer import AbstractTokenizer
 from naivenlp.utils import texts
 
 CHINESE_PATTERN = re.compile(r'[\u4E00-\u9FD5a-zA-Z0-9+#&]+', re.U)
