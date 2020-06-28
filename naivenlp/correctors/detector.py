@@ -1,4 +1,5 @@
 import abc
+import logging
 import re
 
 import kenlm
@@ -6,8 +7,15 @@ import numpy as np
 
 from naivenlp.tokenizers.abstract_tokenizer import AbstractTokenizer
 from naivenlp.utils import texts
+from naivenlp.utils.get_file import get_file
 
 CHINESE_PATTERN = re.compile(r'[\u4E00-\u9FD5a-zA-Z0-9+#&]+', re.U)
+
+KEN_LM_MODEL_PEOPLE_CHARS_LM = 'people_chars_lm.klm'
+
+KEN_LM_MODEL_URLS = {
+    KEN_LM_MODEL_PEOPLE_CHARS_LM: 'https://www.borntowin.cn/mm/emb_models/people_chars_lm.klm'
+}
 
 
 class AbstractDetector(abc.ABC):
@@ -19,12 +27,21 @@ class AbstractDetector(abc.ABC):
 class KenLMDetector(AbstractDetector):
 
     def __init__(self,
-                 kenlm_model_path,
+                 kenlm_model_path=None,
                  confusion_map=None,
                  word_freq_map=None,
                  stop_words=None,
                  tokenizer: AbstractTokenizer = None):
         super().__init__()
+        if not kenlm_model_path:
+            logging.info('kenlm_model_path not specified, use the default model {} from {}'.format(
+                KEN_LM_MODEL_PEOPLE_CHARS_LM, KEN_LM_MODEL_URLS[KEN_LM_MODEL_PEOPLE_CHARS_LM]))
+            kenlm_model_path = get_file(
+                fname=KEN_LM_MODEL_PEOPLE_CHARS_LM,
+                origin=KEN_LM_MODEL_URLS[KEN_LM_MODEL_PEOPLE_CHARS_LM],
+                cache_dir='~/.naivenlp',
+                cache_subdir='correctors',
+            )
         self.kenlm_model = kenlm.Model(kenlm_model_path)
         self.confusion_map = confusion_map if confusion_map is not None else {}
         self.word_freq_map = word_freq_map if word_freq_map is not None else {}
@@ -72,6 +89,56 @@ class KenLMDetector(AbstractDetector):
             return True
         return False
 
+    def _detect_word(self, segment, start_idx):
+        if not self.tokenizer:
+            raise ValueError("You must provide tokenizer when detecting word errors.")
+        maybe_errors = []
+        tokens = self.tokenizer.tokenize(segment)
+        idx = 0
+        for token in tokens:
+            if token in self.word_freq_map:
+                continue
+            if self._filter_token(token):
+                continue
+            begin_idx = idx
+            end_idx = begin_idx + len(token)
+            maybe_err = (token, start_idx + begin_idx, start_idx + end_idx, 'WORD')
+            maybe_errors.append(maybe_err)
+        return maybe_errors
+
+    def _detect_char(self, segment, start_idx, ngrams=[2, 3], ratio=0.6745, threshold=2):
+        maybe_errors = []
+        ngram_avg_scores = []
+        for n in ngrams:
+            scores = []
+            for i in range(len(segment) - n + 1):
+                ngram = segment[i:i + n]
+                s = self.kenlm_model.score(' '.join(ngram), bos=False, eos=False)
+                scores.append(s)
+            if not scores:
+                continue
+            for _ in range(n - 1):
+                scores.insert(0, scores[0])
+                scores.append(scores[-1])
+
+            avg_score = [sum(scores[i: i + n]) / len(scores[i: i + n]) for i in range(len(segment))]
+            ngram_avg_scores.append(avg_score)
+
+        if ngram_avg_scores:
+            segment_scores = list(np.average(np.array(ngram_avg_scores), axis=0))
+            for i in self._maybe_error_index(segment_scores, ratio=ratio, threshold=threshold):
+                token = segment[i]
+                if not token:
+                    continue
+                if token in self.stop_words:
+                    continue
+                if self._filter_token(token):
+                    continue
+                maybe_err = (token, i + start_idx, i + start_idx + 1, 'CHAR')
+                maybe_errors.append(maybe_err)
+
+        return maybe_errors
+
     def _detect(self,
                 segment,
                 start_idx,
@@ -87,51 +154,12 @@ class KenLMDetector(AbstractDetector):
             if idx >= 0:
                 maybe_err = (confusion, start_idx + idx, start_idx + idx + len(confusion), 'CONFUSION')
                 maybe_errors.append(maybe_err)
+                return maybe_errors
 
         if detect_word:
-            if not self.tokenizer:
-                raise ValueError("You must provide tokenizer when detecting word errors.")
-            tokens = self.tokenizer.tokenize(segment)
-            idx = 0
-            for token in tokens:
-                if token in self.word_freq_map:
-                    continue
-                if self._filter_token(token):
-                    continue
-                begin_idx = idx
-                end_idx = begin_idx + len(token)
-                maybe_err = (token, start_idx + begin_idx, start_idx + end_idx, 'WORD')
-                maybe_errors.append(maybe_err)
-
+            maybe_errors.extend(self._detect_word(segment, start_idx))
         if detect_char:
-            ngram_avg_scores = []
-            for n in ngrams:
-                scores = []
-                for i in range(len(segment) - n + 1):
-                    ngram = segment[i:i + n]
-                    s = self.kenlm_model.score(' '.join(ngram), bos=False, eos=False)
-                    scores.append(s)
-                if not scores:
-                    continue
-                for _ in range(n - 1):
-                    scores.insert(0, scores[0])
-                    scores.append(scores[-1])
-
-                avg_score = [sum(scores[i: i + n]) / len(scores[i: i + n]) for i in range(len(segment))]
-                ngram_avg_scores.append(avg_score)
-
-            if ngram_avg_scores:
-                segment_scores = list(np.average(np.array(ngram_avg_scores), axis=0))
-                for i in self._maybe_error_index(segment_scores, ratio=ratio, threshold=threshold):
-                    token = segment[i]
-                    if not token:
-                        continue
-                    if token in self.stop_words:
-                        continue
-                    if self._filter_token(token):
-                        continue
-                    maybe_err = (token, i + start_idx, i + start_idx + 1, 'CHAR')
-                    maybe_errors.append(maybe_err)
+            maybe_errors.extend(self._detect_char(segment, start_idx, ngrams, ratio, threshold))
 
         return maybe_errors
 
