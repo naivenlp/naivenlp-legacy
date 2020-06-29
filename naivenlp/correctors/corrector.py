@@ -7,6 +7,37 @@ from naivenlp.tokenizers.abstract_tokenizer import AbstractTokenizer
 
 from .detector import AbstractDetector, KenLMDetector
 
+pwd = os.path.abspath(os.path.dirname(__file__))
+
+
+DEFAULT_WORD_FREQ_FILES = [
+    'data/word_freq.txt',
+    'data/custom_word_freq.txt',
+    'data/place_name.txt',
+    'data/person_name.txt',
+]
+DEFAULT_WORD_FREQ_FILES = [os.path.join(pwd, d) for d in DEFAULT_WORD_FREQ_FILES]
+
+DEFAULT_CONFUSION_FILES = [
+    'data/custom_confusion.txt'
+]
+DEFAULT_CONFUSION_FILES = [os.path.join(pwd, d) for d in DEFAULT_CONFUSION_FILES]
+
+DEFAULT_STOP_WORD_FILES = [
+    'data/stopwords.txt',
+]
+DEFAULT_STOP_WORD_FILES = [os.path.join(pwd, d) for d in DEFAULT_STOP_WORD_FILES]
+
+DEFAULT_SAME_PINYIN_FILES = [
+    'data/same_pinyin.txt',
+]
+DEFAULT_SAME_PINYIN_FILES = [os.path.join(pwd, d) for d in DEFAULT_SAME_PINYIN_FILES]
+
+DEFAULT_SAME_STROKE_FILES = [
+    'data/same_stroke.txt'
+]
+DEFAULT_SAME_STROKE_FILES = [os.path.join(pwd, d) for d in DEFAULT_SAME_STROKE_FILES]
+
 
 class AbstractCorrector(abc.ABC):
 
@@ -93,24 +124,58 @@ class CorrectorCallbackWrapper(AbstractCorrectorCallback):
 class KenLMCorrector(AbstractCorrector):
 
     def __init__(self,
-                 kenlm_model_path,
+                 kenlm_model_path=None,
                  word_freq_files=None,
                  confusion_files=None,
                  stop_word_files=None,
+                 same_pinyin_files=None,
+                 same_stroke_files=None,
                  tokenizer: AbstractTokenizer = None,
                  **kwargs):
         super().__init__()
-        self.word_freq_map = self._load_word_freq_files(word_freq_files)
-        self.confusion_map = self._load_confusion_files(confusion_files)
-        self.stop_words = self._load_stop_word_files(stop_word_files)
+
+        self.word_freq_map = {}
+        if not word_freq_files:
+            word_freq_files = []
+        word_freq_files.extend(DEFAULT_WORD_FREQ_FILES)
+        self._load_word_freq_files(word_freq_files)
+        logging.info('Load word frequency files finished.')
+
+        self.confusion_map = {}
+        if not confusion_files:
+            confusion_files = []
+        confusion_files.extend(DEFAULT_CONFUSION_FILES)
+        self._load_confusion_files(confusion_files)
+        logging.info('Load confusion files finished.')
+
+        self.stop_words = set()
+        if not stop_word_files:
+            stop_word_files = []
+        stop_word_files.extend(DEFAULT_STOP_WORD_FILES)
+        self._load_stop_word_files(stop_word_files)
+        logging.info('Load stop word files finished.')
+
+        self.same_pinyin_chars = {}
+        if not same_pinyin_files:
+            same_pinyin_files = []
+        same_pinyin_files.extend(DEFAULT_SAME_PINYIN_FILES)
+        self._load_same_pinyin_files(same_pinyin_files)
+        logging.info('Load same pinyin files finished.')
+
+        self.same_stroke_chars = {}
+        if not same_stroke_files:
+            same_stroke_files = []
+        same_stroke_files.extend(DEFAULT_SAME_STROKE_FILES)
+        self._load_same_stroke_files(same_stroke_files)
+        logging.info('Load same stroke files finished.')
+
         self.detector = KenLMDetector(
-            kenlm_model_path,
+            kenlm_model_path=kenlm_model_path,
             confusion_map=self.confusion_map,
             word_freq_map=self.word_freq_map,
             stop_words=self.stop_words,
             tokenizer=tokenizer)
-        self.same_pinyin_chars = {}
-        self.same_stroke_chars = {}
+        logging.info('Initialized detector finished.')
 
     def _get_same_pinyin_candidates_by_word(self, word):
         candidates = set()
@@ -122,7 +187,8 @@ class KenLMCorrector(AbstractCorrector):
 
         def _backtracking(arrs, idx, ans):
             if len(ans) == len(arrs):
-                candidates.add(ans)
+                if ans in self.word_freq_map:
+                    candidates.add(ans)
                 return
             arr = arrs[idx]
             for i in range(len(arr)):
@@ -173,14 +239,15 @@ class KenLMCorrector(AbstractCorrector):
 
         def _backtracking(arrs, idx, ans):
             if len(ans) == len(arrs):
-                candidates.add(ans)
+                if ans in self.word_freq_map:
+                    candidates.add(ans)
                 return
 
             arr = arrs[idx]
             for i in range(len(arr)):
-                arr[idx] = arr[:i] + arr[i + 1:]
+                arrs[idx] = arr[:i] + arr[i + 1:]
                 _backtracking(arrs, idx + 1, ans + arr[i])
-                arr[idx] = arr
+                arrs[idx] = arr
 
         _backtracking(same_stroke_items, 0, '')
 
@@ -193,7 +260,7 @@ class KenLMCorrector(AbstractCorrector):
         candidates.union(self._get_same_pinyin_candidates_by_char(token))
         candidates.union(self._get_same_stroke_candidates_by_word(token))
         candidates.union(self._get_same_stroke_candidates_by_char(token))
-        candidates = sorted(list(candidates), key=lambda x: self.detector.word_freq_map.get(x, 0), reverse=True)
+        candidates = sorted(list(candidates), key=lambda x: self.word_freq_map.get(x, 0), reverse=True)
         candidates = candidates[:topn]
         return candidates
 
@@ -213,9 +280,9 @@ class KenLMCorrector(AbstractCorrector):
                 return_details=False,
                 **kwargs):
         callback = CorrectorCallbackWrapper(callbacks)
-        callback.on_start()
+        callback.on_start(text)
 
-        callback.on_detect_start()
+        callback.on_detect_start(text)
         errors = self.detector.detect(
             text, keep_symbol=keep_symbol, detect_word=detect_word, detect_char=detect_char,
             ngrams=ngrams, ratio=ratio, threshold=threshold, **kwargs)
@@ -254,9 +321,7 @@ class KenLMCorrector(AbstractCorrector):
 
     def _load_word_freq_files(self, files):
         if not files:
-            logging.warning('Argument `word_freq_files` is empty or None.')
             return {}
-        m = {}
         for f in files:
             if not os.path.exists(f):
                 logging.warning('Load word freq file: {} failed. File does not exist. Skipped.'.format(f))
@@ -268,19 +333,17 @@ class KenLMCorrector(AbstractCorrector):
                         continue
                     if line.startswith('#'):
                         continue
-                    words = line.split(' ')
+                    words = line.split()
                     if len(words) < 2:
                         continue
                     word, freq = words[0], int(words[1])
-                    m[word] = freq
+                    self.word_freq_map[word] = freq
             logging.info('Load word freq file: {} successfully.'.format(f))
-        return m
 
     def _load_confusion_files(self, files):
         if not files:
-            logging.warning('Argument `confusion_files` is empty or None.')
+            logging.warning('`confusion_files` is empty or None.')
             return {}
-        m = {}
         for f in files:
             if not os.path.exists(f):
                 logging.warning('Load confusion file: {} fialed. File does not exist. Skipped.'.format(f))
@@ -290,21 +353,21 @@ class KenLMCorrector(AbstractCorrector):
                     line = line.strip('\n').strip()
                     if not line:
                         continue
-                    words = line.split(' ')
+                    if line.startswith('#'):
+                        continue
+                    words = line.split()
                     if len(words) < 2:
                         continue
                     variant, origin = words[0], words[1]
                     freq = int(words[2]) if len(words) > 2 else 1
                     self.word_freq_map[origin] = max(freq, self.word_freq_map.get(origin, 0))
-                    m[variant] = origin
+                    self.confusion_map[variant] = origin
             logging.info('Load confusion file: {} successfully.'.format(f))
-        return m
 
     def _load_stop_word_files(self, files):
         if not files:
-            logging.warning('Argument `stop_word_files` is empty or None.')
+            logging.warning('`stop_word_files` is empty or None.')
             return {}
-        words = set()
         for f in files:
             if not os.path.exists(f):
                 logging.warning('Load stop word file: {} failed. File does not exist. Skipped.'.format(f))
@@ -319,7 +382,62 @@ class KenLMCorrector(AbstractCorrector):
                         continue
                     word = parts[0]
                     freq = int(parts[1]) if len(parts) >= 2 else 1
-                    words.add(word)
+                    self.stop_words.add(word)
                     self.word_freq_map[word] = max(freq, self.word_freq_map.get(word, 0))
             logging.info('Load stop word file: {} successfully.'.format(f))
-        return words
+
+    def _load_same_pinyin_files(self, files):
+        if not files:
+            logging.warning('Load no same pinyin files.')
+            return {}
+        for f in files:
+            if not os.path.exists(f):
+                logging.warning('Load same pinyin file: {} failed. File does not exist. Skipped.'.format(f))
+                continue
+            with open(f, mode='rt', encoding='utf8') as fin:
+                for line in fin:
+                    line = line.strip('\n').strip()
+                    if not line:
+                        continue
+                    if line.startswith('#'):
+                        continue
+                    parts = line.split('\t')
+                    if len(parts) < 1:
+                        continue
+                    word = parts[0]
+                    vairance = ''.join(parts[1:])
+                    same = set()
+                    for v in vairance:
+                        if not v.strip():
+                            continue
+                        same.add(v)
+                    self.same_pinyin_chars[word] = same.union(self.same_pinyin_chars.get(word, set()))
+            logging.info('Load same pinyin file: {} successfully.'.format(f))
+
+    def _load_same_stroke_files(self, files):
+        if not files:
+            logging.warning('Load no same stroke files.')
+            return {}
+        for f in files:
+            if not os.path.exists(f):
+                logging.warning('Load same stroke file: {} failed. File does not exist. Skipped.'.format(f))
+                continue
+            with open(f, mode='rt', encoding='utf8') as fin:
+                for line in fin:
+                    line = line.strip('\n').strip()
+                    if not line:
+                        continue
+                    if line.startswith('#'):
+                        continue
+                    parts = line.split('\t')
+                    if len(parts) < 1:
+                        continue
+                    word = parts[0]
+                    vairance = ''.join(parts[1:])
+                    same = set()
+                    for v in vairance:
+                        if not v.strip():
+                            continue
+                        same.add(v)
+                    self.same_stroke_chars[word] = same.union(self.same_stroke_chars.get(word, set()))
+            logging.info('Load same stroke file: {} successfully.'.format(f))
