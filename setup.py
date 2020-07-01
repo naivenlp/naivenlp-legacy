@@ -17,20 +17,19 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     # include_package_data=True,
     package_data={
-        'naivenlp': [
-            'correctors/data/*'
-        ]
+
     },
     install_requires=[
         "jieba",
         "numpy",
         "pycorrector",
+        "lac"
     ],
     dependency_links=[
         "git+https://github.com/kpu/kenlm.git"
     ],
     extras_require={
-        "lac": ["lac"]
+
     },
     license="Apache Software License",
     classifiers=(

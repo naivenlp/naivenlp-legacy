@@ -2,7 +2,7 @@ import os
 
 import pycorrector
 
-from .corrector import AbstractCorrector
+from .abstract_corrector import AbstractCorrector
 
 
 class KenLMCorrector(AbstractCorrector):
