@@ -182,7 +182,7 @@ class KenLMCorrector(AbstractCorrector):
 
         same_pinyin_items = []
         for w in word:
-            item = list(self.same_pinyin_map.get(w, set([w])))
+            item = list(self.same_pinyin_chars.get(w, set([w])))
             same_pinyin_items.append(item)
 
         def _backtracking(arrs, idx, ans):
@@ -264,8 +264,45 @@ class KenLMCorrector(AbstractCorrector):
         candidates = candidates[:topn]
         return candidates
 
-    def _select_candidate(self, token, candidates):
-        pass
+    def _select_candidate(self, text, token, start_idx, end_idx, candidates, threshold=57):
+        corrected = token
+
+        prefix = text[:start_idx]
+        suffidx = text[end_idx:]
+        ppls = {c: self.ppl(list(prefix + c + suffidx)) for c in candidates}
+        ppls = sorted(ppls.items(), key=lambda x: x[1], reverse=True)
+
+        top_candidates, top_score = set(), ppls[0][1]
+        for c, s in ppls:
+            if s < top_score + threshold:
+                top_candidates.add(c)
+        if token not in top_candidates:
+            corrected = top_candidates[0]
+        return corrected
+
+    def add_same_pinyin(self, word, variants):
+        self.same_pinyin_chars[word] = set(variants).union(self.same_pinyin_chars.get(word, set()))
+
+    def add_same_stroke(self, word, variants):
+        self.same_stroke_chars[word] = set(variants).union(self.same_stroke_chars.get(word, set()))
+
+    def add_stop_words(self, words):
+        if not words:
+            return
+        for w in words:
+            if not w:
+                continue
+            self.stop_words.add(w)
+            self.word_freq_map[w] = max(self.word_freq_map.get(w, 0), 1)
+
+    def add_confusion_words(self, variants, origin):
+        self.confusion_map[variants] = origin
+
+    def ppl(self, sequence):
+        return self.detector.kenlm_model.perplexity(' '.join(sequence))
+
+    def score(self, sequence, bos=False, eos=False):
+        return self.detector.kenlm_model.score(' '.join(sequence), bos=bos, eos=eos)
 
     def correct(self,
                 text,
@@ -301,7 +338,7 @@ class KenLMCorrector(AbstractCorrector):
             if err_type in ['CHAR', 'WORD']:
                 candidate_tokens = self._generate_candidates(token, topn=topn)
                 if candidate_tokens:
-                    corrected_token = self._select_candidate(token, candidate_tokens)
+                    corrected_token = self._select_candidate(text, token, start_idx, end_idx, candidate_tokens)
                     corrections.append((token, corrected_token, start_idx, end_idx))
                     corrected_text += corrected_token
                 else:

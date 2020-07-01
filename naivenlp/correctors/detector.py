@@ -9,7 +9,7 @@ from naivenlp.tokenizers.abstract_tokenizer import AbstractTokenizer
 from naivenlp.utils import texts
 from naivenlp.utils.get_file import get_file
 
-CHINESE_PATTERN = re.compile(r'[\u4E00-\u9FD5a-zA-Z0-9+#&]+', re.U)
+CHINESE_PATTERN = re.compile(r'([\u4E00-\u9FD5a-zA-Z0-9+#&]+)', re.U)
 
 KEN_LM_MODEL_PEOPLE_CHARS_LM = 'people_chars_lm.klm'
 
@@ -124,7 +124,7 @@ class KenLMDetector(AbstractDetector):
             avg_score = [sum(scores[i: i + n]) / len(scores[i: i + n]) for i in range(len(segment))]
             ngram_avg_scores.append(avg_score)
 
-        if ngram_avg_scores:
+        if len(ngram_avg_scores) > 0:
             segment_scores = list(np.average(np.array(ngram_avg_scores), axis=0))
             for i in self._maybe_error_index(segment_scores, ratio=ratio, threshold=threshold):
                 token = segment[i]

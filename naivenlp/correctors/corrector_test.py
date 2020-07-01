@@ -12,8 +12,16 @@ class CorrectorTest(unittest.TestCase):
         self.assertEqual(1366, len(c.confusion_map))
         self.assertEqual(3401, len(c.same_pinyin_chars))
         self.assertEqual(345, len(c.same_stroke_chars))
-        text = (c.correct('工成师'))
-        print('text: {}'.format(text))
+
+        texts = [
+            '软件开发工成师',
+            '少先队员因该为老人让坐',
+        ]
+
+        for text in texts:
+            res = c.correct(text, threshold=0.5)
+            print(' original text: {}'.format(text))
+            print('corrected text: {}'.format(res))
 
 
 if __name__ == "__main__":
