@@ -17,15 +17,16 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     # include_package_data=True,
     package_data={
-        "naivenlp": [
-            "tokenizers/data/dict.txt",
-            "tokenizers/data/prob_emit.p",
-            "tokenizers/data/prob_start.p",
-            "tokenizers/data/prob_trans.p",
-        ]
+
     },
     install_requires=[
         "jieba",
+        "numpy",
+        "pycorrector",
+        "lac"
+    ],
+    dependency_links=[
+        "git+https://github.com/kpu/kenlm.git"
     ],
     extras_require={
 
@@ -33,7 +34,6 @@ setuptools.setup(
     license="Apache Software License",
     classifiers=(
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: Apache Software License",

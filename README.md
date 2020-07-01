@@ -9,8 +9,13 @@ A naive toolkit for NLP.
 
 ## Tokenizers
 
-`naivenlp` defines a interface for tokenization, you can implement your own tokeinizers easily.
+A tokenizer is used to tokenize text. It can converts tokens to ids, and convert ids to tokens.
 
-By default, `naivenlp` provides `JiebaTokenizer`, which is refactoring from [jieba](https://github.com/fxsjy/jieba).
+Here are some vocab-based tokenizers, which means theses tokenizers need an vocabulary.
+
+* `VocabBasedTokenizer`, base class for vocab-based tokenizers.
+* `JiebaTokenizer`, an wrapper for original [fsxjy/jieba](https://github.com/fxsjy/jieba)
+* `BasicTokenizer` and `WordpieceTokenizer`, from [google-research/bert](https://github.com/google-research/bert)
+* `LanguageModelTokenizer`, a tokenizer for language models. `Transformer`, `BERT` for example.
 
 
