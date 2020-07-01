@@ -24,6 +24,7 @@ setuptools.setup(
     install_requires=[
         "jieba",
         "numpy",
+        "pycorrector",
     ],
     dependency_links=[
         "git+https://github.com/kpu/kenlm.git"
