@@ -1,4 +1,3 @@
 from .abstract_tokenizer import AbstractTokenizer
-from .baidu_lac_tokenizer import BaiduLACTokenizer
 from .jieba_tokenizer import JiebaTokenizer
 from .language_model_tokenizer import LanguageModelTokenizer

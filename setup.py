@@ -23,13 +23,12 @@ setuptools.setup(
         "jieba",
         "numpy",
         "pycorrector",
-        "lac"
     ],
     dependency_links=[
         "git+https://github.com/kpu/kenlm.git"
     ],
     extras_require={
-
+        "lac": ["lac"]
     },
     license="Apache Software License",
     classifiers=(
