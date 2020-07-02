@@ -1,3 +1,3 @@
-from .abstract_tokenizer import AbstractTokenizer
+from .abstract_tokenizer import AbstractTokenizer, CustomTokenizer
 from .jieba_tokenizer import JiebaTokenizer
 from .language_model_tokenizer import LanguageModelTokenizer
