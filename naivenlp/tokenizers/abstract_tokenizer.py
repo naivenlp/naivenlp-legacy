@@ -8,6 +8,12 @@ class AbstractTokenizer(abc.ABC):
     def tokenize(self, inputs, **kwargs):
         raise NotImplementedError()
 
+    def tokens2ids(self, inputs, **kwargs):
+        raise NotImplementedError()
+
+    def ids2tokens(self, inputs, **kwargs):
+        raise NotImplementedError()
+
     def encode(self, inputs, **kwargs):
         raise NotImplementedError()
 
@@ -75,8 +81,7 @@ class VocabBasedTokenizer(AbstractTokenizer):
     def tokenize(self, inputs, **kwargs):
         raise NotImplementedError()
 
-    def encode(self, inputs, add_bos=False, add_eos=False, **kwargs):
-        tokens = self.tokenize(inputs, **kwargs)
+    def tokens2ids(self, tokens, add_bos=False, add_eos=False, **kwargs):
         ids = [self.vocab.get(t, self.unk_id) for t in tokens]
         if add_bos:
             ids = [self.bos_id] + ids
@@ -84,12 +89,45 @@ class VocabBasedTokenizer(AbstractTokenizer):
             ids = ids + [self.eos_id]
         return ids
 
-    def decode(self, inputs, drop_bos=True, drop_eos=True, **kwargs):
-        tokens = [self.reverse_vocab.get(t, self.unk_token) for t in inputs]
-        if not tokens:
-            return []
+    def ids2tokens(self, ids, drop_bos=False, drop_eos=False, **kwargs):
+        tokens = [self.reverse_vocab.get(t, self.unk_token) for t in ids]
         if drop_bos and tokens[0] == self.bos_token:
             tokens = tokens[1:]
         if drop_eos and tokens[-1] == self.eos_token:
             tokens = tokens[:-1]
         return tokens
+
+    def encode(self, inputs, add_bos=False, add_eos=False, **kwargs):
+        tokens = self.tokenize(inputs, **kwargs)
+        return self.tokens2ids(tokens, add_bos=add_bos, add_eos=add_eos, **kwargs)
+
+    def decode(self, inputs, drop_bos=True, drop_eos=True, **kwargs):
+        ids = [self.reverse_vocab.get(t, self.unk_token) for t in inputs]
+        if not ids:
+            return []
+        return self.ids2tokens(ids, drop_bos=drop_bos, drop_eos=drop_eos, **kwargs)
+
+
+class CustomTokenizer(VocabBasedTokenizer):
+
+    def __init__(
+        self,
+        vocab_file,
+        tokenize_fn,
+        pad_token='[PAD]',
+            unk_token='[UNK]',
+            bos_token='[BOS]',
+            eos_token='[EOS]',
+            **kwargs):
+        super().__init__(
+            vocab_file,
+            pad_token=pad_token,
+            unk_token=unk_token,
+            bos_token=bos_token,
+            eos_token=eos_token,
+            **kwargs)
+
+        self.tokenize_fn = tokenize_fn
+
+    def tokenize(self, inputs, **kwargs):
+        return self.tokenize_fn(inputs, **kwargs)
