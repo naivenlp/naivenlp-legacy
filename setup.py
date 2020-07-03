@@ -23,6 +23,7 @@ setuptools.setup(
         "jieba",
         "numpy",
         "pycorrector",
+        "strsimpy",
     ],
     dependency_links=[
         "git+https://github.com/kpu/kenlm.git"
