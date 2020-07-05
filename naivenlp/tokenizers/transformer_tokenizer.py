@@ -2,7 +2,7 @@ from .abstract_tokenizer import VocabBasedTokenizer
 from .tokenizer import BasicTokenizer, WordpieceTokenizer
 
 
-class LanguageModelTokenizer(VocabBasedTokenizer):
+class TransformerTokenizer(VocabBasedTokenizer):
 
     def __init__(self,
                  vocab_file,
@@ -49,7 +49,3 @@ class LanguageModelTokenizer(VocabBasedTokenizer):
             tokens = self.wordpiece_tokenizer.tokenize(inputs)
 
         return tokens
-
-
-class TransformerTokenizer(LanguageModelTokenizer):
-    pass

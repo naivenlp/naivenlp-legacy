@@ -5,12 +5,23 @@
 [![Python](https://img.shields.io/pypi/pyversions/naivenlp.svg?style=plastic)](https://badge.fury.io/py/naivenlp)
 
 
-NLP工具包。
+NLP常用工具包。
+
+
 
 主要包含以下模块：
 
-* [Tokenizers](#tokenizers), 分词器
-* [Correctors](#correctors), 纠错模块
+- [naivenlp](#naivenlp)
+  - [Tokenizers](#tokenizers)
+    - [JiebaTokenizer的使用](#jiebatokenizer的使用)
+    - [CustomTokenizer的使用](#customtokenizer的使用)
+    - [BasicTokenizer的使用](#basictokenizer的使用)
+    - [WordpieceTokenizer的使用](#wordpiecetokenizer的使用)
+    - [TransformerTokenizer的使用](#transformertokenizer的使用)
+    - [BertTokenizer的使用](#berttokenizer的使用)
+  - [Correctors](#correctors)
+  - [Similarity](#similarity)
+
 
 ## Tokenizers
 
@@ -18,14 +29,10 @@ NLP工具包。
 
 `naivenlp.tokenizers`模块包含以下`Tokenizer`实现：
 
-* `AbstractTokenizer`，所有`Tokenizer`的抽象基类
-* `VocabBasedTokenizer`，基于词典文件的`Tokenizer`，子类需要实现`tokenize`方法
 * `JiebaTokenizer`，继承自`VocabBasedTokenizer`，分词使用`jieba`
 * `CustomTokenizer`，继承自`VocabBasedTokenizer`，基于词典文件的`Tokenizer`，包装`tokenize_fn`自定义函数来实现各种自定义的`Tokenizer`
-* `BasicTokenizer`和`WordpieceTokenizer`，来自[google-research/bert](https://github.com/google-research/bert)的`Tokenizer`
-* `LanguageModelTokenizer`，基于词典的`Tokenizer`，可以用于`Transformer`等语言模型
-* `TransformerTokenizer`，继承自`LanguageModelTokenizer`，可用于`Transformer`模型分词
-* `BertTokenizer`，继承自`LanguageModelTokenizer`，用于`BERT`模型分词
+* `TransformerTokenizer`，继承自`VocabBasedTokenizer`，用于`Transformer`模型分词
+* `BertTokenizer`，继承自`VocabBasedTokenizer`，用于`BERT`模型分词
 
 
 
@@ -119,28 +126,6 @@ tokenizer.tokenize('hello world, 你好世界')
 ```
 
 
-### LanguageModelTokenizer的使用
-
-`LanguageModelTokenizer`只是简单的组合`BasicTokenizer`和`WordpieceTokenizer`。
-
-```python
-from naivenlp.tokenizers import LanguageModelTokenizer
-
-tokenizer = LanguageModelTokenizer(
-    vocab_file='vocab.txt',
-    pad_token='[PAD]',
-    unk_token='[UNK]',
-    bos_token='[BOS]',
-    eos_token='[EOS]',
-    do_lower_case=True,
-    do_basic_tokenization=True,
-    tokenize_chinese_chars=True,
-)
-
-tokenizer.tokenize('Hello World, 你好世界')
-
-```
-
 ### TransformerTokenizer的使用
 
 ```python
@@ -172,3 +157,44 @@ tokenizer.encode('Hello World, 你好世界', add_bos=False, add_eos=False)
 
 ## Correctors
 
+
+
+## Similarity
+
+多种字符串相似度的度量。是对[luozhouyang/python-string-similarity](https://github.com/luozhouyang/python-string-similarity)的包装。
+
+```python
+import naivenlp
+
+a = 'ACCTTTDEX'
+b = 'CGGTTEEXX'
+
+naivenlp.cosine_distance(a, b)
+
+naivenlp.cosine_similarity(a, b)
+
+naivenlp.jaccard_distance(a, b)
+
+naivenlp.jaccard_similarity(a, b)
+
+naivenlp.levenshtein_distance(a, b)
+
+naivenlp.levenshtein_distance_normalized(a, b)
+
+naivenlp.levenshtein_similarity(a, b)
+
+naivenlp.weighted_levenshtein_distance(a, b)
+
+naivenlp.damerau_distance(a, b)
+
+naivenlp.lcs_distance(a, b)
+
+naivenlp.lcs_length(a, b)
+
+naivenlp.sorense_dice_distance(a, b)
+
+naivenlp.sorense_dice_similarity(a, b)
+
+naivenlp.optimal_string_alignment_distance(a, b)
+
+```

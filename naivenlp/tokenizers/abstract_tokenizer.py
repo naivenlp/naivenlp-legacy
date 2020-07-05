@@ -23,45 +23,45 @@ class AbstractTokenizer(abc.ABC):
 
 class VocabBasedTokenizer(AbstractTokenizer):
 
-    def __init__(self,
-                 vocab_file,
-                 pad_token='[PAD]',
-                 unk_token='[UNK]',
-                 bos_token='[BOS]',
-                 eos_token='[EOS]',
-                 **kwargs):
+    def __init__(self, vocab_file, **kwargs):
         self.vocab_file = vocab_file
-        self.pad_token = pad_token
-        self.unk_token = unk_token
-        self.bos_token = bos_token
-        self.eos_token = eos_token
-        self.pad_id = 0
-        self.unk_id = 1
-        self.bos_id = 2
-        self.eos_id = 3
 
-        self.vocab = self._load_vocab(vocab_file)
+        self._special_tokens = []
+        for k, v in kwargs.items():
+            if str(k).endswith('_token') and v is not None:
+                self._special_tokens.append((k, v))
+
+        self.vocab = self._build_vocab(vocab_file)
         self.reverse_vocab = self._reverse_vocab()
 
-    def _load_vocab(self, file):
-        vocabs = dict(self.special_tokens)
+        for k, v in self._special_tokens:
+            _id = str(k.split('_')[0]) + '_id'
+            setattr(self, k, v)
+            setattr(self, _id, self.vocab[v])
+
+    def _build_vocab(self, file):
         if not file:
             logging.warning('vocab_file is empty or None.')
-            return vocabs
-        if not os.path.exists(file):
-            logging.warning('vocab file {} does not exists.'.format(file))
-            return vocabs
-        idx = len(vocabs)
+            return {}
+        words = []
         with open(file, mode='rt', encoding='utf8') as fin:
             for line in fin:
-                word = line.rstrip('\n').strip()
-                if not word:
+                line = line.strip('\n').strip()
+                if not line:
                     continue
-                if word in vocabs:
-                    continue
-                vocabs[word] = idx
-                idx += 1
-        return vocabs
+                word = line.strip()
+                words.append(word)
+
+        vocab = set(words)
+        special_tokens = [v for _, v in self._special_tokens][::-1]
+        for t in special_tokens:
+            if t not in vocab:
+                words.insert(1, t)
+
+        d = {}
+        for i in range(len(words)):
+            d[words[i]] = i
+        return d
 
     def _reverse_vocab(self):
         reverse_vocabs = {}
@@ -73,10 +73,8 @@ class VocabBasedTokenizer(AbstractTokenizer):
     def vocab_size(self):
         return len(self.vocab)
 
-    @property
     def special_tokens(self):
-        return [(self.pad_token, self.pad_id), (self.unk_token, self.unk_id),
-                (self.bos_token, self.bos_id), (self.eos_token, self.eos_id)]
+        return self._special_tokens
 
     def tokenize(self, inputs, **kwargs):
         raise NotImplementedError()
@@ -110,15 +108,14 @@ class VocabBasedTokenizer(AbstractTokenizer):
 
 class CustomTokenizer(VocabBasedTokenizer):
 
-    def __init__(
-        self,
-        vocab_file,
-        tokenize_fn,
-        pad_token='[PAD]',
-            unk_token='[UNK]',
-            bos_token='[BOS]',
-            eos_token='[EOS]',
-            **kwargs):
+    def __init__(self,
+                 vocab_file,
+                 tokenize_fn,
+                 pad_token='[PAD]',
+                 unk_token='[UNK]',
+                 bos_token='[BOS]',
+                 eos_token='[EOS]',
+                 **kwargs):
         super().__init__(
             vocab_file,
             pad_token=pad_token,
