@@ -9,7 +9,7 @@ class JiebaTokenizerTest(unittest.TestCase):
 
     def testTokenize(self):
         tokenizer = JiebaTokenizer(
-            vocab_file=None,
+            vocab_file='testdata/vocab_chinese.txt',
             userdict_files=[
                 'data/jieba/hello.txt',
                 'naivenlp/tokenizers/data/dict.txt',
