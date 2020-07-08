@@ -24,6 +24,7 @@ setuptools.setup(
         "numpy",
         "pycorrector",
         "strsimpy",
+        "pyunit_sogou"
     ],
     dependency_links=[
         "git+https://github.com/kpu/kenlm.git"
