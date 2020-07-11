@@ -19,8 +19,12 @@ from naivenlp.similarity import (
     sorense_dice_similarity,
     weighted_levenshtein_distance,
 )
+from naivenlp.tokenizers.abstract_tokenizer import AbstractTokenizer, CustomTokenizer, VocabBasedTokenizer
+from naivenlp.tokenizers.bert_tokenizer import BertTokenizer
+from naivenlp.tokenizers.tokenizer import BasicTokenizer, WordpieceTokenizer
+from naivenlp.tokenizers.transformer_tokenizer import TransformerTokenizer
 
-__version__ = "0.0.4"
+__version__ = "0.0.5"
 __name__ = "naivenlp"
 
 
