@@ -53,10 +53,10 @@ class VocabBasedTokenizer(AbstractTokenizer):
                 words.append(word)
 
         vocab = set(words)
-        special_tokens = [v for _, v in self._special_tokens][::-1]
+        special_tokens = [v for _, v in self._special_tokens]
         for t in special_tokens:
             if t not in vocab:
-                words.insert(1, t)
+                words.append(t)
 
         d = {}
         for i in range(len(words)):
