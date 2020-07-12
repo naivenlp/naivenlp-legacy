@@ -19,6 +19,7 @@ from naivenlp.similarity import (
     sorense_dice_similarity,
     weighted_levenshtein_distance,
 )
+from naivenlp.structures.trie import AbstractTrie, Node, Trie
 from naivenlp.tokenizers.abstract_tokenizer import AbstractTokenizer, CustomTokenizer, VocabBasedTokenizer
 from naivenlp.tokenizers.bert_tokenizer import BertTokenizer
 from naivenlp.tokenizers.tokenizer import BasicTokenizer, WordpieceTokenizer
