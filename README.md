@@ -20,6 +20,8 @@ NLP常用工具包。
     - [TransformerTokenizer的使用](#transformertokenizer的使用)
     - [BertTokenizer的使用](#berttokenizer的使用)
   - [Correctors](#correctors)
+    - [n-gram语言模型和词典纠错](#n-gram语言模型和词典纠错)
+    - [基于深度学习的纠错](#基于深度学习的纠错)
   - [Similarity](#similarity)
 
 
@@ -157,44 +159,77 @@ tokenizer.encode('Hello World, 你好世界', add_bos=False, add_eos=False)
 
 ## Correctors
 
+文本纠错，包括传统的n-gram语言模型和词典的方式，也可以使用基于深度学习的方法。
+
+### n-gram语言模型和词典纠错
+
+这里的`KenLMCorrector`是对 [shibing624/pycorrector](https://github.com/shibing624/pycorrector) 项目的包装。
+
+```python
+from naivenlp import KenLMCorrector
+
+c = KenLMCorrector()
+texts = [
+    '软件开发工成师',
+    '少先队员因该为老人让坐',
+]
+
+for text in texts:
+    print(c.correct(text))
+
+```
+可以得到纠错结果：
+
+```bash
+('软件开发工程师', [('工成师', '工程师', 4, 7)])
+('少先队员应该为老人让座', [('因该', '应该', 4, 6), ('坐', '座', 10, 11)])
+```
+
+### 基于深度学习的纠错
+
+主要是利用`seq2seq`模型完成纠错。例如：
+
+* `RNN` + `Attention` 传统的`seq2seq` 模型
+* `Transformer`模型
+
+TODO
 
 
 ## Similarity
 
 多种字符串相似度的度量。是对[luozhouyang/python-string-similarity](https://github.com/luozhouyang/python-string-similarity)的包装。
 
-```python
-import naivenlp
-
-a = 'ACCTTTDEX'
-b = 'CGGTTEEXX'
-
-naivenlp.cosine_distance(a, b)
-
-naivenlp.cosine_similarity(a, b)
-
-naivenlp.jaccard_distance(a, b)
-
-naivenlp.jaccard_similarity(a, b)
-
-naivenlp.levenshtein_distance(a, b)
-
-naivenlp.levenshtein_distance_normalized(a, b)
-
-naivenlp.levenshtein_similarity(a, b)
-
-naivenlp.weighted_levenshtein_distance(a, b)
-
-naivenlp.damerau_distance(a, b)
-
-naivenlp.lcs_distance(a, b)
-
-naivenlp.lcs_length(a, b)
-
-naivenlp.sorense_dice_distance(a, b)
-
-naivenlp.sorense_dice_similarity(a, b)
-
-naivenlp.optimal_string_alignment_distance(a, b)
-
+```bash
+>>> import naivenlp
+>>> a = 'ACCTTTDEX'
+>>> b = 'CGGTTEEXX'
+>>> naivenlp.cosine_distance(a, b)
+1.0
+>>> naivenlp.cosine_similarity(a, b)
+1.0
+>>> naivenlp.jaccard_distance(a, b)
+1.0
+>>> naivenlp.jaccard_similarity(a, b)
+0.0
+>>> naivenlp.levenshtein_distance(a, b)
+5
+>>> naivenlp.levenshtein_distance_normalized(a, b)
+0.5555555555555556
+>>> naivenlp.levenshtein_similarity(a, b)
+0.4444444444444444
+>>> naivenlp.weighted_levenshtein_distance(a, b)
+5.0
+>>> naivenlp.damerau_distance(a, b)
+5
+>>> naivenlp.lcs_distance(a, b)
+8
+>>> naivenlp.lcs_length(a, b)
+5
+>>> naivenlp.sorense_dice_distance(a, b)
+1.0
+>>> naivenlp.sorense_dice_similarity(a, b)
+0.0
+>>> naivenlp.optimal_string_alignment_distance(a, b)
+5
+>>> 
 ```
