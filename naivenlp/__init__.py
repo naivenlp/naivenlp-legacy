@@ -1,5 +1,6 @@
 import logging
 
+from naivenlp.correctors.kenlm_corrector import KenLMCorrector
 from naivenlp.similarity import (
     cosine_distance,
     cosine_similarity,

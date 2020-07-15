@@ -18,7 +18,8 @@ class KenLMCorrectorTest(unittest.TestCase):
         ]
 
         for text in texts:
-            self.assertEqual(c.correct(text), c.corrector.correct(text))
+            print(c.correct(text))
+            self.assertEqual(c.correct(text)[0], c.corrector.correct(text)[0])
 
 
 if __name__ == "__main__":
