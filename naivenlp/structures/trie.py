@@ -152,7 +152,7 @@ class Trie(AbstractTrie):
             print('.')
         for k, n in node.children.items():
             print("|    " * (depth + 1) + '+----' + n.val)
-            self._show(n, depth + 1)
+            self._show(n, depth + 1, max_depth)
 
     def show(self, max_depth=None):
         self._show(self.root, 0, max_depth=max_depth)
