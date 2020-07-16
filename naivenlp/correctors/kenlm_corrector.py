@@ -55,4 +55,8 @@ class KenLMCorrector(AbstractCorrector):
                 self.corrector.same_stroke.update(m)
 
     def correct(self, text, **kwargs):
-        return self.corrector.correct(text)
+        corrected, details = self.corrector.correct(text)
+        res = []
+        for d in details:
+            res.append((d[0], d[1], d[2], d[3]))
+        return corrected, res
