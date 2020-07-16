@@ -22,15 +22,15 @@ setuptools.setup(
     install_requires=[
         "jieba",
         "numpy",
-        "pycorrector",
         "strsimpy",
         "pyunit_sogou"
     ],
     dependency_links=[
-        "git+https://github.com/kpu/kenlm.git"
+
     ],
     extras_require={
-
+        "pycorrector": ["pycorrector"],
+        "kenlm": ["git+https://github.com/kpu/kenlm.git"]
     },
     license="Apache Software License",
     classifiers=(
