@@ -171,7 +171,7 @@ tokenizer.encode('Hello World, 你好世界', add_bos=False, add_eos=False)
 这里的`KenLMCorrector`是对 [shibing624/pycorrector](https://github.com/shibing624/pycorrector) 项目的包装。
 
 ```python
-from naivenlp import KenLMCorrector
+from naivenlp.correctors import KenLMCorrector
 
 c = KenLMCorrector()
 texts = [
