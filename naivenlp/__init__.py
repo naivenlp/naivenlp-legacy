@@ -25,6 +25,7 @@ from naivenlp.tokenizers.abstract_tokenizer import AbstractTokenizer, CustomToke
 from naivenlp.tokenizers.bert_tokenizer import BertTokenizer
 from naivenlp.tokenizers.tokenizer import BasicTokenizer, WordpieceTokenizer
 from naivenlp.tokenizers.transformer_tokenizer import TransformerTokenizer
+from naivenlp.utils.texts import b2q, q2b, split_sentence
 
 __version__ = "0.0.5"
 __name__ = "naivenlp"

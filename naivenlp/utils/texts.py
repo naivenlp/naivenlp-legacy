@@ -1,3 +1,6 @@
+import re
+
+
 def char_half2full(uchar):
     """Convert characters from half-width to full-width."""
     inside_code = ord(uchar)
@@ -8,6 +11,19 @@ def char_half2full(uchar):
     else:
         inside_code += 0xfee0
     return chr(inside_code)
+
+
+def string_half2full(s):
+    return "".join([char_half2full(c) for c in s])
+
+
+def b2q(s):
+    """Convert character(s) from half-width to full-width."""
+    if not s:
+        return ""
+    if len(s) == 1:
+        return char_half2full(s)
+    return string_half2full(s)
 
 
 def char_full2half(uchar):
@@ -25,3 +41,18 @@ def char_full2half(uchar):
 def string_full2half(ustring):
     """Convert string from full-width to half-width."""
     return "".join([char_full2half(uchar) for uchar in ustring])
+
+
+def q2b(s):
+    """Convert character(s) from full-width to half-width."""
+    if not s:
+        return ""
+    if len(s) == 1:
+        return char_full2half(s)
+    return string_full2half(s)
+
+
+def split_sentence(text, reg=None):
+    """Split long text to a list of sentence."""
+    p = reg if reg is not None else '[\\n\\t\\s；。：;]+'
+    return re.split(p, text)

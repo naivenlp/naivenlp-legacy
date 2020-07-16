@@ -23,6 +23,7 @@ NLP常用工具包。
     - [n-gram语言模型和词典纠错](#n-gram语言模型和词典纠错)
     - [基于深度学习的纠错](#基于深度学习的纠错)
   - [Similarity](#similarity)
+  - [Utils](#utils)
 
 
 ## Tokenizers
@@ -233,3 +234,12 @@ TODO
 5
 >>> 
 ```
+
+## Utils
+
+常用文本操作：
+
+* `naivenlp.q2b(s)` 全角转半角
+* `naivenlp.b2q(s)` 半角转全角
+* `naivenlp.split_sentence(s)` 把长文本切分成句子列表
+
