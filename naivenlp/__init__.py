@@ -1,6 +1,5 @@
 import logging
 
-from naivenlp.correctors.kenlm_corrector import KenLMCorrector
 from naivenlp.similarity import (
     cosine_distance,
     cosine_similarity,
@@ -27,7 +26,7 @@ from naivenlp.tokenizers.tokenizer import BasicTokenizer, WordpieceTokenizer
 from naivenlp.tokenizers.transformer_tokenizer import TransformerTokenizer
 from naivenlp.utils.texts import b2q, q2b, split_sentence
 
-__version__ = "0.0.6"
+__version__ = "0.0.7"
 __name__ = "naivenlp"
 
 
