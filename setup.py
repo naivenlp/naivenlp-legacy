@@ -29,8 +29,7 @@ setuptools.setup(
 
     ],
     extras_require={
-        "pycorrector": ["pycorrector"],
-        "kenlm": ["git+https://github.com/kpu/kenlm.git"]
+
     },
     license="Apache Software License",
     classifiers=(
