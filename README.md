@@ -23,7 +23,11 @@ NLP常用工具包。
     - [n-gram语言模型和词典纠错](#n-gram语言模型和词典纠错)
     - [基于深度学习的纠错](#基于深度学习的纠错)
   - [Similarity](#similarity)
+  - [Structures](#structures)
+    - [Trie的使用](#trie的使用)
   - [Utils](#utils)
+  - [Datasource](#datasource)
+    - [下载搜狗词库](#下载搜狗词库)
 
 
 ## Tokenizers
@@ -235,6 +239,52 @@ TODO
 >>> 
 ```
 
+## Structures
+
+常用的数据结构实现。
+
+目前支持：
+
+* 字典树Trie
+
+
+### Trie的使用
+
+```bash
+>>> import naivenlp
+>>> trie = naivenlp.Trie()
+>>> trie.put('上海市浦东新区')
+>>> trie.show()
+.
+|    +----上
+|    |    +----海
+|    |    |    +----市
+|    |    |    |    +----浦
+|    |    |    |    |    +----东
+|    |    |    |    |    |    +----新
+|    |    |    |    |    |    |    +----区
+>>> trie.put('上海市黄浦区')
+>>> trie.show()
+.
+|    +----上
+|    |    +----海
+|    |    |    +----市
+|    |    |    |    +----浦
+|    |    |    |    |    +----东
+|    |    |    |    |    |    +----新
+|    |    |    |    |    |    |    +----区
+|    |    |    |    +----黄
+|    |    |    |    |    +----浦
+|    |    |    |    |    |    +----区
+>>> for r in trie.keys_with_prefix('上海市'):
+...     print(r)
+... 
+['上', '海', '市', '浦', '东', '新', '区']
+['上', '海', '市', '黄', '浦', '区']
+>>> 
+
+```
+
 ## Utils
 
 常用文本操作：
@@ -243,3 +293,26 @@ TODO
 * `naivenlp.b2q(s)` 半角转全角
 * `naivenlp.split_sentence(s)` 把长文本切分成句子列表
 
+
+## Datasource
+
+数据收集模块。目前支持：
+
+* 下载所有的搜狗词库保存成文本文件
+
+
+### 下载搜狗词库
+
+```python
+from naivenlp.datasources import sogou_datasource as sg
+
+# 下载category_id=1下面所有的词典，保存到/tmp/sogou
+sg.download_category(1, '/tmp/sogou')
+
+# 下载所有category保存到/tmp/sogou
+sg.download_all_category('/tmp/sogou')
+
+# 把下载的所有文件合成一个文件
+sg.collect('/tmp/sogou', './sogou.vocab', maxlen=6)
+
+```
