@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="naivenlp",
-    version="0.0.7",
+    version="0.0.8",
     description="NLP toolkit, including tokenization, sequence tagging, etc.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -22,15 +22,15 @@ setuptools.setup(
     install_requires=[
         "jieba",
         "numpy",
-        "pycorrector",
         "strsimpy",
         "pyunit_sogou"
     ],
     dependency_links=[
-        "git+https://github.com/kpu/kenlm.git"
+
     ],
     extras_require={
-
+        "pycorrector": ["pycorrector"],
+        "kenlm": ["git+https://github.com/kpu/kenlm.git"]
     },
     license="Apache Software License",
     classifiers=(

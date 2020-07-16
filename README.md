@@ -12,6 +12,7 @@ NLP常用工具包。
 主要包含以下模块：
 
 - [naivenlp](#naivenlp)
+  - [Installation](#installation)
   - [Tokenizers](#tokenizers)
     - [JiebaTokenizer的使用](#jiebatokenizer的使用)
     - [CustomTokenizer的使用](#customtokenizer的使用)
@@ -28,6 +29,20 @@ NLP常用工具包。
   - [Utils](#utils)
   - [Datasource](#datasource)
     - [下载搜狗词库](#下载搜狗词库)
+
+
+## Installation
+
+```bash
+pip install -U naivenlp
+```
+
+Install extra dependencies:
+
+```bash
+pip install pycorrector
+pip install git+https://github.com/kpu/kenlm.git
+```
 
 
 ## Tokenizers

@@ -1,0 +1,2 @@
+pycorrector
+git+https://github.com/kpu/kenlm.git
