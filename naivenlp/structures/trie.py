@@ -151,7 +151,7 @@ class Trie(AbstractTrie):
         if depth == 0:
             print('.')
         for k, n in node.children.items():
-            print("|    " * (depth + 1) + '+----' + n.val)
+            print("|    " * depth + '+----' + n.val)
             self._show(n, depth + 1, max_depth)
 
     def show(self, max_depth=None):
