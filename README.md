@@ -319,7 +319,7 @@ TODO
 ### 下载搜狗词库
 
 ```python
-from naivenlp.datasources import sogou_datasource as sg
+from naivenlp.datasources import sogou as sg
 
 # 下载category_id=1下面所有的词典，保存到/tmp/sogou
 sg.download_category(1, '/tmp/sogou')

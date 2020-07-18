@@ -23,7 +23,8 @@ setuptools.setup(
         "jieba",
         "numpy",
         "strsimpy",
-        "pyunit_sogou"
+        "fake_useragent",
+        "requests",
     ],
     dependency_links=[
 
