@@ -2,6 +2,7 @@ import logging
 import math
 import os
 import re
+import struct
 from urllib.parse import quote, unquote
 
 import requests
