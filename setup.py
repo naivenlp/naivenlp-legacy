@@ -30,7 +30,7 @@ setuptools.setup(
 
     ],
     extras_require={
-
+        "tf": ["tensorflow>=2.2.0"]
     },
     license="Apache Software License",
     classifiers=(

@@ -1,4 +1,5 @@
 jieba
 numpy
+strsimpy
 fake_useragent
 requests
