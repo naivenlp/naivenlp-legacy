@@ -29,6 +29,7 @@ jobs:
         pip install wheel setuptools
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install git+https://github.com/kpu/kenlm.git
         if [ -f requirements-extra.txt ]; then pip install -r requirements-extra.txt; fi
     - name: Lint with flake8
       run: |
@@ -38,4 +39,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest --ignore naivenlp/correctors/kenlm_corrector_test.py
+        pytest --ignore naivenlp/correctors/ --ignore naivenlp/datasource/

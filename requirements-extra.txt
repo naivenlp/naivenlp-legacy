@@ -1,2 +1,3 @@
+tensorflow>=2.2.0
 pycorrector
-git+https://github.com/kpu/kenlm.git
+

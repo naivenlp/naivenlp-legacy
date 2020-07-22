@@ -212,8 +212,21 @@ for text in texts:
 * `RNN` + `Attention` 传统的`seq2seq` 模型
 * `Transformer`模型
 
-TODO
+模型的训练使用 [OpenNMT-tf](https://github.com/OpenNMT/OpenNMT-tf) 库，训练方法请到此项目的文档查看。
 
+以下是使用`Transformer`模型的示例：
+
+```bash
+>>> from naivenlp.correctors import TransformerCorrector
+>>> SAVED_MODEL='/models/correction_models/transformer-step-2000' # 此处换成你自己训练的模型，SavedModel格式
+>>> corrector = TransformerCorrector(SAVED_MODEL)
+>>> result, prob = corrector.correct('我最近每天晚上都会拧着鼻子去喝30cc的醋了。')
+>>> print('result: ', result)
+result:  我最近每天晚上都会拧着鼻子去喝30cc的醋。
+>>> print('  prob: ', prob)
+  prob:  -6.088574
+>>>
+```
 
 ## Similarity
 
@@ -271,26 +284,27 @@ TODO
 >>> trie.put('上海市浦东新区')
 >>> trie.show()
 .
-|    +----上
-|    |    +----海
-|    |    |    +----市
-|    |    |    |    +----浦
-|    |    |    |    |    +----东
-|    |    |    |    |    |    +----新
-|    |    |    |    |    |    |    +----区
++----上
+|    +----海
+|    |    +----市
+|    |    |    +----浦
+|    |    |    |    +----东
+|    |    |    |    |    +----新
+|    |    |    |    |    |    +----区
 >>> trie.put('上海市黄浦区')
 >>> trie.show()
 .
-|    +----上
-|    |    +----海
-|    |    |    +----市
-|    |    |    |    +----浦
-|    |    |    |    |    +----东
-|    |    |    |    |    |    +----新
-|    |    |    |    |    |    |    +----区
-|    |    |    |    +----黄
-|    |    |    |    |    +----浦
++----上
+|    +----海
+|    |    +----市
+|    |    |    +----浦
+|    |    |    |    +----东
+|    |    |    |    |    +----新
 |    |    |    |    |    |    +----区
+|    |    |    +----黄
+|    |    |    |    +----浦
+|    |    |    |    |    +----区
+>>> 
 >>> for r in trie.keys_with_prefix('上海市'):
 ...     print(r)
 ... 
@@ -319,7 +333,7 @@ TODO
 ### 下载搜狗词库
 
 ```python
-from naivenlp.datasources import sogou_datasource as sg
+from naivenlp.datasources import sogou as sg
 
 # 下载category_id=1下面所有的词典，保存到/tmp/sogou
 sg.download_category(1, '/tmp/sogou')

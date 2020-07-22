@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="naivenlp",
-    version="0.0.8",
+    version="0.0.9",
     description="NLP toolkit, including tokenization, sequence tagging, etc.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -23,13 +23,14 @@ setuptools.setup(
         "jieba",
         "numpy",
         "strsimpy",
-        "pyunit_sogou"
+        "fake_useragent",
+        "requests",
     ],
     dependency_links=[
 
     ],
     extras_require={
-
+        "tf": ["tensorflow>=2.2.0"]
     },
     license="Apache Software License",
     classifiers=(

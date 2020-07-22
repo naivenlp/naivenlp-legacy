@@ -26,7 +26,7 @@ class KenLMCorrector(AbstractCorrector):
         self.same_stroke_map = self.corrector.same_stroke
         self.confusion_map = self.corrector.custom_confusion
         self.word_freq_map = self.corrector.word_freq
-        self.stop_words_set = self.corrector.stopwords
+        self.stop_words_map = self.corrector.stopwords
 
         if word_freq_files:
             for f in word_freq_files:
@@ -53,6 +53,13 @@ class KenLMCorrector(AbstractCorrector):
                     continue
                 m = self.corrector.load_same_stroke(f, sep='\t')
                 self.corrector.same_stroke.update(m)
+
+        if stop_word_files:
+            for f in stop_word_files:
+                if not os.path.exists(f):
+                    continue
+                d = self.corrector.load_word_freq_dict(f)
+                self.stop_words_map.update(d)
 
     def correct(self, text, **kwargs):
         corrected, details = self.corrector.correct(text)
