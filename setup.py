@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="naivenlp",
-    version="0.0.8",
+    version="0.0.9",
     description="NLP toolkit, including tokenization, sequence tagging, etc.",
     long_description=long_description,
     long_description_content_type="text/markdown",
