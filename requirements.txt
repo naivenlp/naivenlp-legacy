@@ -1,7 +1,4 @@
 jieba
 numpy
-git+https://github.com/kpu/kenlm.git
-pycorrector
-strsimpy
 fake_useragent
 requests
